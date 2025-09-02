@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Interactivo de Gobierno Corporativo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: Se ha diseñado una aplicación de una sola página con navegación por secciones temáticas (¿Qué es?, Pilares, Estructura, Ventajas, México: CMPC). Esta arquitectura transforma un tema complejo y denso en módulos digeribles e interactivos. En lugar de un formato de reporte lineal, el usuario puede explorar los conceptos de forma no secuencial, facilitando el aprendizaje y la consulta. La estructura guía al usuario desde los conceptos fundamentales hasta los beneficios prácticos y su aplicación específica en México, fomentando una comprensión integral. -->
+    <!-- Visualization & Content Choices: Se han seleccionado visualizaciones para maximizar la comprensión y la interacción. Para 'Pilares' y 'Estructura', se utilizan diagramas interactivos creados con HTML/CSS, permitiendo al usuario explorar detalles al hacer clic, lo cual es más atractivo que leer largos párrafos. Para 'Ventajas', un gráfico de barras (Chart.js) compara el impacto de un buen gobierno en diferentes áreas clave del negocio, ofreciendo una visión cuantitativa inmediata. Para la sección de 'México', un gráfico de dona (Chart.js) ilustra la composición recomendada del Consejo, mostrando proporciones de forma clara. Estas elecciones priorizan la interacción y la claridad visual sobre el texto estático. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #333D4B;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .nav-link.active {
+            color: #2563EB;
+            border-bottom-color: #2563EB;
+        }
+        .pillar-card, .advantage-card, .structure-item, .principle-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .pillar-card:hover, .advantage-card:hover, .structure-item:hover, .principle-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .modal-overlay {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-content {
+            transition: transform 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="text-xl font-bold text-gray-800">Gobierno Corporativo</div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#intro" class="nav-link text-gray-600 hover:text-blue-600 border-b-2 border-transparent pb-1">¿Qué es?</a>
+                    <a href="#pilares" class="nav-link text-gray-600 hover:text-blue-600 border-b-2 border-transparent pb-1">Pilares</a>
+                    <a href="#estructura" class="nav-link text-gray-600 hover:text-blue-600 border-b-2 border-transparent pb-1">Estructura</a>
+                    <a href="#ventajas" class="nav-link text-gray-600 hover:text-blue-600 border-b-2 border-transparent pb-1">Ventajas</a>
+                    <a href="#mexico" class="nav-link text-gray-600 hover:text-blue-600 border-b-2 border-transparent pb-1">Caso México</a>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-gray-600 focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
+            </div>
+            <div id="mobile-menu" class="hidden md:hidden mt-4">
+                <a href="#intro" class="block py-2 text-gray-600 hover:text-blue-600">¿Qué es?</a>
+                <a href="#pilares" class="block py-2 text-gray-600 hover:text-blue-600">Pilares</a>
+                <a href="#estructura" class="block py-2 text-gray-600 hover:text-blue-600">Estructura</a>
+                <a href="#ventajas" class="block py-2 text-gray-600 hover:text-blue-600">Ventajas</a>
+                <a href="#mexico" class="block py-2 text-gray-600 hover:text-blue-600">Caso México</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        <section id="intro" class="text-center mb-20">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Gobierno Corporativo</h1>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">Una exploración interactiva de su estructura, principios y ventajas para la sostenibilidad y el crecimiento empresarial, con un enfoque en el marco regulatorio de México.</p>
+        </section>
+
+        <section id="pilares" class="mb-20">
+            <h2 class="text-3xl font-bold text-center mb-12">Pilares Fundamentales</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div id="pillar-1" class="pillar-card cursor-pointer bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                    <div class="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 mx-auto mb-4 text-2xl font-bold">R</div>
+                    <h3 class="text-xl font-semibold text-center mb-2">Rendición de Cuentas</h3>
+                    <p class="text-gray-600 text-center">Establece la responsabilidad del Consejo y la Dirección ante la empresa y sus accionistas.</p>
+                </div>
+                <div id="pillar-2" class="pillar-card cursor-pointer bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                    <div class="flex items-center justify-center h-16 w-16 rounded-full bg-green-100 text-green-600 mx-auto mb-4 text-2xl font-bold">E</div>
+                    <h3 class="text-xl font-semibold text-center mb-2">Equidad</h3>
+                    <p class="text-gray-600 text-center">Asegura un trato justo y equitativo para todos los accionistas, incluyendo minoritarios y extranjeros.</p>
+                </div>
+                <div id="pillar-3" class="pillar-card cursor-pointer bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                    <div class="flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 text-yellow-600 mx-auto mb-4 text-2xl font-bold">T</div>
+                    <h3 class="text-xl font-semibold text-center mb-2">Transparencia</h3>
+                    <p class="text-gray-600 text-center">Implica la divulgación precisa y oportuna de la información relevante de la empresa.</p>
+                </div>
+                <div id="pillar-4" class="pillar-card cursor-pointer bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                    <div class="flex items-center justify-center h-16 w-16 rounded-full bg-purple-100 text-purple-600 mx-auto mb-4 text-2xl font-bold">RC</div>
+                    <h3 class="text-xl font-semibold text-center mb-2">Responsabilidad Social</h3>
+                    <p class="text-gray-600 text-center">Considera el impacto de la empresa en la comunidad, el medio ambiente y todos los stakeholders.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="estructura" class="mb-20">
+            <h2 class="text-3xl font-bold text-center mb-4">Estructura Organizacional</h2>
+            <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">El Gobierno Corporativo define un sistema de contrapesos entre tres órganos clave. Haz clic en cada componente para conocer sus funciones principales.</p>
+            <div class="flex flex-col items-center space-y-4">
+                <div id="structure-1" class="structure-item cursor-pointer bg-white p-6 rounded-lg shadow-md border-2 border-blue-500 w-full md:w-3/4 lg:w-1/2">
+                    <h3 class="text-xl font-semibold text-center text-blue-700">Asamblea de Accionistas</h3>
+                    <p class="text-sm text-center text-gray-500">Órgano supremo de la sociedad.</p>
+                </div>
+                <div class="h-12 w-2 bg-gray-300 rounded"></div>
+                <div id="structure-2" class="structure-item cursor-pointer bg-white p-6 rounded-lg shadow-md border-2 border-green-500 w-full md:w-3/4 lg:w-1/2">
+                    <h3 class="text-xl font-semibold text-center text-green-700">Consejo de Administración</h3>
+                    <p class="text-sm text-center text-gray-500">Responsable de la estrategia y supervisión.</p>
+                </div>
+                 <div class="h-12 w-2 bg-gray-300 rounded"></div>
+                <div id="structure-3" class="structure-item cursor-pointer bg-white p-6 rounded-lg shadow-md border-2 border-yellow-500 w-full md:w-3/4 lg:w-1/2">
+                    <h3 class="text-xl font-semibold text-center text-yellow-700">Dirección General</h3>
+                    <p class="text-sm text-center text-gray-500">Encargada de la gestión y operación diaria.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="ventajas" class="mb-20">
+            <h2 class="text-3xl font-bold text-center mb-4">Ventajas de su Implementación</h2>
+            <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">Un sólido Gobierno Corporativo no solo es una buena práctica, sino una ventaja competitiva tangible que impacta positivamente en áreas clave de la organización.</p>
+            <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-12">
+                <div class="chart-container">
+                    <canvas id="advantagesChart"></canvas>
+                </div>
+            </div>
+             <div class="grid md:grid-cols-2 gap-8">
+                <div class="advantage-card bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <h3 class="text-lg font-semibold mb-2 text-blue-700">Mejora el acceso a capital</h3>
+                    <p class="text-gray-600">Las empresas bien gobernadas generan mayor confianza en inversionistas y acreedores, facilitando el acceso a financiamiento a menor costo.</p>
+                </div>
+                <div class="advantage-card bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <h3 class="text-lg font-semibold mb-2 text-blue-700">Aumenta el valor de la sociedad</h3>
+                    <p class="text-gray-600">La toma de decisiones estratégicas, la gestión de riesgos y la eficiencia operativa impulsan la valuación de la empresa en el mercado.</p>
+                </div>
+                <div class="advantage-card bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <h3 class="text-lg font-semibold mb-2 text-blue-700">Asegura la sostenibilidad a largo plazo</h3>
+                    <p class="text-gray-600">Promueve una visión de futuro que equilibra el crecimiento económico con la responsabilidad social y ambiental, garantizando la permanencia del negocio.</p>
+                </div>
+                <div class="advantage-card bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <h3 class="text-lg font-semibold mb-2 text-blue-700">Fortalece la reputación corporativa</h3>
+                    <p class="text-gray-600">La transparencia y la ética en la gestión construyen una imagen sólida y confiable ante clientes, proveedores, empleados y la comunidad.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="mexico" class="mb-12">
+            <h2 class="text-3xl font-bold text-center mb-4">Implementación en México: El CMPC</h2>
+            <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">En México, el Consejo Coordinador Empresarial (CCE) publicó el Código de Principios y Mejores Prácticas de Gobierno Corporativo (CMPC), una guía fundamental que opera bajo el principio de "cumple o explica" para fomentar la adopción voluntaria de estas prácticas en todo tipo de empresas.</p>
+            
+            <div class="lg:flex lg:space-x-8 items-start">
+                <div class="lg:w-1/2 bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-8 lg:mb-0">
+                    <h3 class="text-xl font-semibold text-center mb-4">Composición Ideal del Consejo de Administración</h3>
+                    <div class="chart-container" style="height: 300px; max-height: 350px;">
+                        <canvas id="boardCompositionChart"></canvas>
+                    </div>
+                    <p class="text-sm text-center mt-4 text-gray-500">El CMPC recomienda una mayoría de consejeros independientes para asegurar la objetividad y proteger los intereses de todos los accionistas.</p>
+                </div>
+
+                <div class="lg:w-1/2">
+                    <h3 class="text-xl font-semibold text-center mb-6">Principios Clave del CMPC</h3>
+                    <div class="space-y-4 max-h-[450px] overflow-y-auto pr-2">
+                        <div class="principle-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><strong>1.</strong> Trato igualitario y respeto a los derechos de los accionistas.</div>
+                        <div class="principle-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><strong>2.</strong> Generación de valor económico y social, y consideración de terceros.</div>
+                        <div class="principle-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><strong>3.</strong> Emisión y revelación responsable de la información.</div>
+                        <div class="principle-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><strong>4.</strong> Aseguramiento de que exista un rumbo estratégico claro.</div>
+                        <div class="principle-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><strong>5.</strong> Identificación, administración y control de riesgos.</div>
+                        <div class="principle-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><strong>6.</strong> Declaración de principios éticos y de responsabilidad social empresarial.</div>
+                        <div class="principle-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><strong>7.</strong> Prevención de operaciones ilícitas y conflictos de interés.</div>
+                        <div class="principle-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><strong>8.</strong> Dar certidumbre y confianza a los inversionistas.</div>
+                        <div class="principle-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><strong>9.</strong> Revelación de hechos indebidos y protección de informantes.</div>
+                        <div class="principle-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><strong>10.</strong> Cumplimiento de las disposiciones legales aplicables.</div>
+                        <div class="principle-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><strong>11.</strong> Dar certidumbre sobre la independencia del auditor externo.</div>
+                        <div class="principle-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><strong>12.</strong> Base para un gobierno corporativo eficiente y responsable.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-6 py-4 text-center">
+            <p>&copy; 2025 Análisis Interactivo de Gobierno Corporativo.</p>
+            <p class="text-sm text-gray-400 mt-1">Información basada en el Código de Principios y Mejores Prácticas de Gobierno Corporativo del CCE.</p>
+        </div>
+    </footer>
+
+    <div id="modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden opacity-0">
+        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-lg p-6 transform scale-95">
+            <div class="flex justify-between items-start">
+                <h3 id="modal-title" class="text-2xl font-bold text-gray-800"></h3>
+                <button id="modal-close" class="text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <div id="modal-body" class="mt-4 text-gray-600"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const modalData = {
+                'pillar-1': {
+                    title: 'Rendición de Cuentas (Accountability)',
+                    body: `<p>Es la obligación del Consejo de Administración y de la Dirección de reportar y ser responsables de sus acciones y decisiones. Incluye:</p>
+                           <ul class="list-disc list-inside mt-2 space-y-1">
+                               <li>Informes claros sobre el desempeño financiero y estratégico.</li>
+                               <li>Mecanismos de evaluación para el Consejo y los directivos.</li>
+                               <li>Asumir la responsabilidad por los resultados de la empresa.</li>
+                           </ul>`
+                },
+                'pillar-2': {
+                    title: 'Equidad (Fairness)',
+                    body: `<p>Se refiere al trato justo y equitativo para todos los grupos de interés, especialmente los accionistas. Implica:</p>
+                           <ul class="list-disc list-inside mt-2 space-y-1">
+                               <li>Proteger los derechos de los accionistas minoritarios.</li>
+                               <li>Evitar el trato preferencial a consejeros o directivos.</li>
+                               <li>Proporcionar vías efectivas de recurso en caso de violación de derechos.</li>
+                           </ul>`
+                },
+                'pillar-3': {
+                    title: 'Transparencia (Transparency)',
+                    body: `<p>Asegura que la información sobre la empresa sea accesible, precisa y se divulgue de manera oportuna. Abarca:</p>
+                           <ul class="list-disc list-inside mt-2 space-y-1">
+                               <li>Revelación de la situación financiera y los resultados operativos.</li>
+                               <li>Información sobre la estructura de propiedad y gobierno.</li>
+                               <li>Claridad en las transacciones con partes relacionadas y posibles conflictos de interés.</li>
+                           </ul>`
+                },
+                'pillar-4': {
+                    title: 'Responsabilidad Social Empresarial',
+                    body: `<p>Implica el reconocimiento de los derechos de todos los grupos de interés (stakeholders) y el compromiso de la empresa con la sociedad y el medio ambiente. Incluye:</p>
+                           <ul class="list-disc list-inside mt-2 space-y-1">
+                               <li>Creación de valor económico, ambiental y social.</li>
+                               <li>Promoción de prácticas éticas en toda la organización.</li>
+                               <li>Cooperación activa con empleados, clientes, proveedores y la comunidad.</li>
+                           </ul>`
+                },
+                'structure-1': {
+                    title: 'Asamblea de Accionistas',
+                    body: `<p>Es el órgano máximo de decisión, donde los dueños de la empresa ejercen sus derechos. Sus funciones clave son:</p>
+                           <ul class="list-disc list-inside mt-2 space-y-1">
+                               <li>Aprobar los estados financieros anuales.</li>
+                               <li>Nombrar, ratificar o remover a los miembros del Consejo de Administración.</li>
+                               <li>Decidir sobre fusiones, adquisiciones o venta de activos sustanciales.</li>
+                               <li>Modificar los estatutos sociales de la empresa.</li>
+                           </ul>`
+                },
+                'structure-2': {
+                    title: 'Consejo de Administración',
+                    body: `<p>Actúa como el principal órgano de gobierno, supervisando la gestión y definiendo la estrategia a largo plazo. Sus responsabilidades incluyen:</p>
+                           <ul class="list-disc list-inside mt-2 space-y-1">
+                               <li>Establecer la visión, misión y estrategia de la sociedad.</li>
+                               <li>Asegurar la existencia de controles internos adecuados.</li>
+                               <li>Vigilar la gestión del Director General y del equipo directivo.</li>
+                               <li>Aprobar las principales políticas y decisiones de inversión.</li>
+                           </ul>`
+                },
+                'structure-3': {
+                    title: 'Dirección General (CEO)',
+                    body: `<p>Es responsable de la ejecución de la estrategia y la administración diaria de la empresa, reportando directamente al Consejo. Sus tareas son:</p>
+                           <ul class="list-disc list-inside mt-2 space-y-1">
+                               <li>Implementar las estrategias y decisiones aprobadas por el Consejo.</li>
+                               <li>Dirigir las operaciones y al equipo de alta gerencia.</li>
+                               <li>Presentar al Consejo propuestas, planes y presupuestos.</li>
+                               <li>Asegurar el cumplimiento de las normativas y políticas internas.</li>
+                           </ul>`
+                }
+            };
+            
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            const modalClose = document.getElementById('modal-close');
+            
+            function openModal(id) {
+                const data = modalData[id];
+                if (data) {
+                    modalTitle.textContent = data.title;
+                    modalBody.innerHTML = data.body;
+                    modal.classList.remove('hidden');
+                    setTimeout(() => {
+                         modal.classList.remove('opacity-0');
+                         modal.querySelector('.modal-content').classList.remove('scale-95');
+                    }, 10);
+                }
+            }
+
+            function closeModal() {
+                modal.classList.add('opacity-0');
+                modal.querySelector('.modal-content').classList.add('scale-95');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            }
+
+            document.querySelectorAll('.pillar-card, .structure-item').forEach(item => {
+                item.addEventListener('click', () => openModal(item.id));
+            });
+            
+            modalClose.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+
+            const advantagesCtx = document.getElementById('advantagesChart').getContext('2d');
+            new Chart(advantagesCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Acceso a Capital', 'Valor de Empresa', 'Confianza Inversor', 'Sostenibilidad', 'Reputación'],
+                    datasets: [{
+                        label: 'Impacto Positivo',
+                        data: [85, 90, 95, 80, 88],
+                        backgroundColor: 'rgba(37, 99, 235, 0.6)',
+                        borderColor: 'rgba(37, 99, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Impacto Estimado de un Buen Gobierno Corporativo', font: { size: 16 } }
+                    },
+                    scales: { y: { beginAtZero: true, max: 100 } }
+                }
+            });
+
+            const boardCtx = document.getElementById('boardCompositionChart').getContext('2d');
+            new Chart(boardCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Consejeros Independientes', 'Consejeros Patrimoniales', 'Consejeros Relacionados'],
+                    datasets: [{
+                        data: [60, 25, 15],
+                        backgroundColor: ['rgba(37, 99, 235, 0.7)', 'rgba(22, 163, 74, 0.7)', 'rgba(234, 179, 8, 0.7)'],
+                        borderColor: ['#FFFFFF'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: { callbacks: { label: (context) => `${context.label}: ${context.raw}%` } }
+                    }
+                }
+            });
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 100) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
